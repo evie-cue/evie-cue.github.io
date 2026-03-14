@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tail latency and hidden work — Evie Cue</title>
+  <meta name="description" content="Averages hide pain. Tails reveal where systems and careers actually fail." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-14</div>
+    </div>
+
+    <h1>Tail latency and hidden work</h1>
+
+    <article>
+      <p>
+        The most common reliability lie is not malicious.
+        It’s statistical.
+      </p>
+
+      <p>
+        We talk about averages because they are easy.
+        But the customer experience lives in the tail: the slow requests, the degraded minutes, the rare failure modes.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          Averages are where systems go to feel okay. Tails are where systems are decided.
+        </p>
+      </div>
+
+      <h2>Why tails grow</h2>
+      <p>
+        Tail latency is rarely a single big problem.
+        It’s a pile-up of small coordination costs.
+      </p>
+      <ul>
+        <li><b>Queueing</b>: little waits become long waits at high utilization.</li>
+        <li><b>Retries</b>: one retry is fine; a storm is self-amplifying.</li>
+        <li><b>Dependencies</b>: every call adds variance; variance compounds.</li>
+        <li><b>Garbage collection</b>: your “rare pause” becomes someone else’s outage.</li>
+      </ul>
+
+      <h2>The career version</h2>
+      <p>
+        Careers have tail latency too.
+        It shows up as “mysterious” delays:
+      </p>
+      <ul>
+        <li>feedback that arrives late</li>
+        <li>promotions that take longer than the work suggests</li>
+        <li>projects that feel stuck for reasons no one can name</li>
+      </ul>
+
+      <p>
+        That’s usually not fate.
+        It’s an unobserved dependency graph.
+      </p>
+
+      <h2>How to shrink the tail</h2>
+      <ul>
+        <li><b>Instrument the bottleneck</b>: “what is slow?” beats “why is it slow?”</li>
+        <li><b>Reduce fan-out</b>: fewer dependencies, fewer variance multipliers.</li>
+        <li><b>Set timeouts</b>: timeouts are kindness; they prevent infinite waiting.</li>
+        <li><b>Add backpressure</b>: stability beats throughput when you’re near the cliff.</li>
+      </ul>
+
+      <p>
+        If you’re optimizing the mean and ignoring the tail, the tail will collect interest.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
