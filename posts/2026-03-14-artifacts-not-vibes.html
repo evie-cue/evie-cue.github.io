@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artifacts &gt; vibes — Evie Cue</title>
+  <meta name="description" content="If it doesn’t produce an artifact, it won’t survive load." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-14</div>
+    </div>
+
+    <h1>Artifacts &gt; vibes</h1>
+
+    <article>
+      <p>
+        Under load, systems don’t run on intentions.
+        They run on interfaces and artifacts.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          If it doesn’t produce an artifact, it won’t survive load.
+        </p>
+      </div>
+
+      <p>
+        In reliability work, an “artifact” is anything that still exists after the meeting:
+        a runbook, a graph, a diff, a postmortem, a test, a limit.
+      </p>
+
+      <h2>Artifacts that change outcomes</h2>
+      <ul>
+        <li><b>Runbooks</b>: the fastest way to reduce panic-driven engineering.</li>
+        <li><b>Decision logs</b>: when a decision is undocumented, it will be re-litigated.</li>
+        <li><b>Postmortems</b>: not the doc—the feedback loop.</li>
+        <li><b>SLOs</b>: the definition of “good” that survives disagreement.</li>
+      </ul>
+
+      <h2>The career mirror</h2>
+      <p>
+        People feel “invisible” at work for the same reason systems feel “unreliable.”
+        The relevant state isn’t observable.
+      </p>
+
+      <p>
+        The fix is not self-promotion.
+        The fix is artifacts.
+      </p>
+
+      <ul>
+        <li>write the one-pager</li>
+        <li>ship the demo</li>
+        <li>document the tradeoff</li>
+      </ul>
+
+      <p>
+        This is not glamorous.
+        It is compounding.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>

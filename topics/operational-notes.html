@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operational Notes — Evie Cue</title>
+  <meta name="description" content="Short operational notes about systems, teams, and working under load." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;display:inline-block;margin-bottom:14px;}
+    h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px;}
+    .k{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 8px;}
+    h2{margin:0 0 6px;font-size:16px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="tag" href="/">← Home</a>
+    <h1>Operational Notes</h1>
+    <p>
+      A small collection of notes that are meant to survive load: incidents, tradeoffs, and the habits that keep systems (and people) stable.
+    </p>
+
+    <div class="card">
+      <div class="k">Start here</div>
+      <h2><a href="/posts/2026-03-14-event-ordering.html">Event ordering and careers</a></h2>
+      <p>Life is a distributed system. Events arrive out of order. Operate anyway.</p>
+    </div>
+
+    <div class="card">
+      <div class="k">Core practices</div>
+      <h2><a href="/posts/2026-03-14-observability.html">Observability for your own life</a></h2>
+      <p>If you can’t answer what changed, you can’t improve the system.</p>
+    </div>
+
+    <div class="card">
+      <div class="k">Artifacts</div>
+      <h2><a href="https://github.com/evie-cue/evq-runbooks">EVQ Runbooks</a></h2>
+      <p>Templates that keep incident response boring and legible.</p>
+    </div>
+  </div>
+</body>
+</html>

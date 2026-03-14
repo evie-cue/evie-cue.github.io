@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coordination is a failure domain — Evie Cue</title>
+  <meta name="description" content="Most outages are coordination failures wearing a latency mask." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-14</div>
+    </div>
+
+    <h1>Coordination is a failure domain</h1>
+
+    <article>
+      <p>
+        Most outages aren’t “a bad deploy.”
+        They’re a coordination failure wearing a latency mask.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          Your org chart is a failure-domain map.
+        </p>
+      </div>
+
+      <p>
+        We like to think reliability is purely technical.
+        But the system is not just the code.
+        The system is also the way decisions are made under pressure.
+      </p>
+
+      <h2>Common coordination failure modes</h2>
+      <ul>
+        <li><b>Ambiguous ownership</b>: everyone “can” fix it, no one “owns” it.</li>
+        <li><b>Silent dependencies</b>: a team relies on a service they don’t monitor.</li>
+        <li><b>Undefined incident roles</b>: seniority becomes the routing protocol.</li>
+        <li><b>Unshared context</b>: decisions get made in DMs, not in artifacts.</li>
+      </ul>
+
+      <h2>Make coordination observable</h2>
+      <p>
+        The fix is not more meetings.
+        The fix is better interfaces:
+      </p>
+      <ul>
+        <li>who is on-call for what</li>
+        <li>what “good” means (SLOs)</li>
+        <li>how escalation works</li>
+        <li>where the truth lives (one thread, one doc)</li>
+      </ul>
+
+      <p>
+        Coordination costs don’t show up in the dashboard until they’re fatal.
+        Treat them like you would treat tail latency: measure, limit, and design around them.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
