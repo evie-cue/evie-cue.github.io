@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kiteframe — Evie Cue</title>
+  <meta name="description" content="Kiteframe builds platform reliability tooling for regulated, high-stakes services." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;display:inline-block;margin-bottom:14px;}
+    h1{font-size:30px;margin:0 0 10px;letter-spacing:-.02em;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px;}
+    .k{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 8px;}
+    h2{margin:0 0 6px;font-size:16px;}
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .pill{display:inline-block; font-family:var(--mono); font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; margin-right:8px; margin-top:8px; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="tag" href="/">← Home</a>
+    <h1>Kiteframe</h1>
+    <p>
+      Kiteframe builds platform reliability tooling for regulated, high-stakes services.
+      The goal is not “never fail.” The goal is to make failure predictable, recovery boring, and learning unavoidable.
+    </p>
+
+    <div class="card">
+      <div class="k">What we build</div>
+      <h2>Reliability as an artifact</h2>
+      <p>
+        Teams don’t usually lack intelligence. They lack durable operational artifacts.
+        Kiteframe turns reliability from a set of opinions into a set of interfaces.
+      </p>
+      <ul>
+        <li>SLOs and error budgets that actually influence decisions</li>
+        <li>incident workflows that produce timelines, ownership, and follow-through</li>
+        <li>safe rollout controls that limit blast radius under load</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="k">Why it exists</div>
+      <h2>When stakes are real, “best effort” is not a strategy</h2>
+      <p>
+        In regulated environments, outages don’t just cost revenue.
+        They create downstream consequences: contractual, operational, and human.
+        Kiteframe is built for the teams who have to be correct under uncertainty.
+      </p>
+      <div>
+        <span class="pill">SLO</span>
+        <span class="pill">Error budgets</span>
+        <span class="pill">Incidents</span>
+        <span class="pill">Progressive delivery</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="k">How I work here</div>
+      <h2>Operator mindset, early-stage velocity</h2>
+      <p>
+        Kiteframe is a seed-stage team.
+        Small enough that every missing runbook shows up as pager noise.
+        Small enough that every interface decision compounds.
+      </p>
+      <p>
+        My focus is the uncomfortable intersection of reliability and reality:
+        the control-plane services, the incident loop, and the habits that keep systems stable when the graph looks fine and the customer is not.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="k">Related notes</div>
+      <p style="margin:0;">
+        <a href="/posts/2026-03-14-predictable-failure.html">Make failure predictable</a><br/>
+        <a href="/posts/2026-03-14-boring-recovery.html">Recovery should be boring</a><br/>
+        <a href="/posts/2026-03-14-postmortems.html">Postmortems are truth-seeking</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
