@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event ordering and careers — Evie Cue</title>
+  <meta name="description" content="Life is a distributed system. Events arrive out of order. Here's how to operate anyway." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--card:#121725;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-14</div>
+    </div>
+
+    <h1>Event ordering and careers</h1>
+
+    <article>
+      <p>
+        A lot of career advice assumes your life behaves like a single-threaded program: step 1, then step 2, then step 3.
+        You do the work, you get the outcome, the timeline makes sense.
+      </p>
+
+      <p>
+        Distributed systems taught me a quieter truth: events rarely arrive in the order you expect.
+        Signals get delayed. Messages duplicate. Causes and effects are separated by retries, queues, and humans.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          If your plan assumes causal ordering, you will misdiagnose reality.
+        </p>
+      </div>
+
+      <h2>What to do instead</h2>
+      <p>
+        In production, you build systems that remain correct under uncertainty. Careers are the same.
+        The move is not “predict perfectly.” The move is “make decisions safe to retry.”
+      </p>
+
+      <ul>
+        <li><b>Idempotent moves</b>: decisions you can repeat without regret (apply again, ask again, ship again).</li>
+        <li><b>Artifacts</b>: a portfolio you can point at when memory and narrative fail (notes, demos, write-ups).</li>
+        <li><b>Escalation paths</b>: people who will tell you the truth quickly (mentors, peers, operators).</li>
+        <li><b>Observability</b>: feedback loops that detect drift early (weekly changelog, goals, energy budget).</li>
+      </ul>
+
+      <h2>The operator’s version of “luck”</h2>
+      <p>
+        The older I get, the more I treat “luck” as late-arriving data.
+        It’s not mystical. It’s physics: your system can’t react to what it can’t see.
+      </p>
+
+      <p>
+        If you want fewer surprises, don’t demand order from the world.
+        Demand clarity from your own system.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
