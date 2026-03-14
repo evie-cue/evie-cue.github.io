@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evie Cue — Operational Notes</title>
+  <meta name="description" content="Operational notes on reliability, distributed systems, and working under load." />
+  <style>
+    :root{
+      --bg:#0b0d12; --fg:#e8e8ea; --muted:#a7acb6; --card:#121725; --accent:#a78bfa;
+      --line:rgba(255,255,255,.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg); margin:0; font-family:var(--sans);}
+    a{color:inherit; text-decoration:none; border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px; margin:0 auto; padding:56px 20px 72px;}
+    .top{display:flex; flex-wrap:wrap; gap:18px; align-items:baseline; justify-content:space-between;}
+    h1{font-size:34px; margin:0; letter-spacing:-.02em;}
+    .tag{font-family:var(--mono); font-size:12px; color:var(--muted); border:1px solid var(--line); padding:6px 10px; border-radius:999px;}
+    .lede{margin:18px 0 0; color:var(--muted); font-size:16px; line-height:1.6; max-width:72ch;}
+    .grid{display:grid; grid-template-columns:1fr; gap:14px; margin-top:28px;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+          border:1px solid var(--line); border-radius:14px; padding:16px 16px 14px;}
+    .kicker{font-family:var(--mono); font-size:12px; color:var(--muted); margin:0 0 8px;}
+    .card h2{margin:0 0 8px; font-size:16px; letter-spacing:-.01em;}
+    .card p{margin:0; color:var(--muted); line-height:1.55; font-size:14px;}
+    .cols{display:grid; grid-template-columns:1fr; gap:14px; margin-top:18px;}
+    @media(min-width:760px){ .grid{grid-template-columns:1fr 1fr;} .cols{grid-template-columns:1fr 1fr;} }
+    footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px;}
+    .pill{display:inline-block; font-family:var(--mono); font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; margin-right:8px; margin-top:8px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Evie Cue</h1>
+      <div class="tag">Operational Notes · Reliability · Distributed Systems</div>
+    </div>
+
+    <p class="lede">
+      I build distributed systems that behave under stress. These are short notes about reliability, incident response,
+      and the human coordination layer that determines whether a system is actually stable.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="kicker">Principle</div>
+        <h2>Make failure predictable</h2>
+        <p>SLOs, error budgets, and runbooks exist to remove surprise—not to create dashboards.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Principle</div>
+        <h2>Recovery should be boring</h2>
+        <p>If recovery depends on heroics, the system is already in debt.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Principle</div>
+        <h2>Artifacts &gt; vibes</h2>
+        <p>Write it down. Ship something. If it doesn’t produce an artifact, it won’t survive load.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Principle</div>
+        <h2>Coordination is a failure domain</h2>
+        <p>Most outages are coordination failures wearing a latency mask.</p>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="card">
+        <div class="kicker">Pinned drafts</div>
+        <h2>1) Event ordering in careers</h2>
+        <p>Life is a distributed system. Events arrive duplicated, late, and out of order. Build idempotent moves.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Pinned drafts</div>
+        <h2>2) Backpressure for humans</h2>
+        <p>Burnout is a backpressure failure. WIP limits aren’t just for software.</p>
+      </div>
+    </div>
+
+    <footer>
+      <div>
+        <span class="pill">SRE</span>
+        <span class="pill">SLO</span>
+        <span class="pill">Postmortems</span>
+        <span class="pill">p99</span>
+      </div>
+      <p style="margin-top:12px;">Contact: <a href="mailto:theeviecue@outlook.com">theeviecue@outlook.com</a></p>
+      <p>© <span id="y"></span> Evie Cue</p>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
