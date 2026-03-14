@@ -92,7 +92,26 @@
       <p style="margin-top:12px;">Contact: <a href="mailto:theeviecue@outlook.com">theeviecue@outlook.com</a></p>
       <p>© <span id="y"></span> Evie Cue</p>
     </footer>
+
+    <div class="card" style="margin-top:18px;">
+      <div class="kicker">Comments</div>
+      <h2 style="margin-top:0;">Notes are better when they’re argued with</h2>
+      <p style="margin-bottom:12px;">Comments are backed by GitHub Issues (via Utterances). Keep it technical.</p>
+      <div id="comments"></div>
+    </div>
+
   </div>
+
+  <!-- Utterances comments: requires public repo with Issues enabled -->
+  <script src="https://utteranc.es/client.js"
+          repo="evie-cue/evie-cue.github.io"
+          issue-term="pathname"
+          label="comment"
+          theme="github-dark"
+          crossorigin="anonymous"
+          async>
+  </script>
+
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
