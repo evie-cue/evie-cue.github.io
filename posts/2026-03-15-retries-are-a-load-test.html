@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Retries are a load test — Evie Cue</title>
+  <meta name="description" content="Retries are not a reliability feature by default. They are traffic multiplication. Treat them like controlled explosives." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-15</div>
+    </div>
+
+    <h1>Retries are a load test</h1>
+
+    <article>
+      <p>
+        Retries are not a reliability feature by default.
+        They are traffic multiplication.
+      </p>
+
+      <p>
+        When something starts failing, the instinct is “try again.”
+        That instinct is rational locally (one request).
+        At system scale it can be catastrophic: every retry is a vote to increase load on the thing that’s already struggling.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          The first retry is empathy. The tenth is violence.
+        </p>
+      </div>
+
+      <h2>The math you can’t negotiate with</h2>
+      <p>
+        If you have a dependency that is failing 10% of calls under load, and clients retry once, you just increased its inbound traffic.
+        More traffic increases saturation. Saturation increases tail latency. Tail latency triggers more timeouts. Timeouts trigger more retries.
+        Congratulations: you built a self-fulfilling outage.
+      </p>
+
+      <p>
+        “But retries increase success rate.”
+        Sure—sometimes.
+        The question is not whether a retry can work.
+        The question is whether your retry policy is <i>stable</i> under failure.
+      </p>
+
+      <h2>Make retries boring (and bounded)</h2>
+      <ul>
+        <li><b>Budget retries</b>: cap retries per request and per unit time. Treat the retry budget like an error budget.</li>
+        <li><b>Jitter everything</b>: <code>exponential backoff + full jitter</code> is a baseline, not an optimization.</li>
+        <li><b>Retry only safe operations</b>: idempotent writes, or writes with idempotency keys. Otherwise you’re creating duplicates during the fog of war.</li>
+        <li><b>Fail fast when saturated</b>: combine retries with admission control so the system can say “no” early and consistently.</li>
+      </ul>
+
+      <h2>Observe the retry storm</h2>
+      <p>
+        If you can’t see retries, you can’t control them.
+        Instrument:
+      </p>
+      <ul>
+        <li>retry rate by client and endpoint</li>
+        <li>attempt count distribution (p50/p95 of attempts per request)</li>
+        <li>success-after-retry vs. failure-after-retry</li>
+        <li>downstream saturation signals (queue depth, concurrency, CPU) correlated with retry spikes</li>
+      </ul>
+
+      <p>
+        The best retry policy is the one you can explain during an incident without hand-waving.
+        If it takes a thesis, it will not survive 3am.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
