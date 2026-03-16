@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Load shedding is customer support — Evie Cue</title>
+  <meta name="description" content="When the system can’t keep up, someone will do the work. Either the system sheds load intentionally, or customers and on-call do it for you." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-16</div>
+    </div>
+
+    <h1>Load shedding is customer support</h1>
+
+    <article>
+      <p>
+        When the system can’t keep up, someone will do the work.
+        Either the system sheds load intentionally, or customers and on-call do it for you.
+      </p>
+
+      <p>
+        This is why load shedding is not just a reliability tactic.
+        It’s a product behavior.
+        It determines what your users experience when reality stops matching your happy-path assumptions.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          If you don’t choose your degradation mode, your users will choose one for you.
+        </p>
+      </div>
+
+      <h2>Shedding vs. failing: choose the shape of the pain</h2>
+      <p>
+        Under overload you have a few options:
+        accept everything and get slow (tail latency spike),
+        accept everything and get inconsistent (timeouts + retries),
+        or accept less and stay sane.
+      </p>
+
+      <p>
+        The “accept less” path is load shedding.
+        It’s admission control.
+        It’s telling the truth early.
+      </p>
+
+      <h2>Good load shedding feels like boundaries</h2>
+      <ul>
+        <li><b>Fast, explicit rejections</b>: return a clear 429/503 with a stable message. Don’t make people wait 30 seconds for a timeout.</li>
+        <li><b>Protect the core loop</b>: identify the minimum viable workflow and defend it. Everything else is optional during a storm.</li>
+        <li><b>Degrade by feature, not by randomness</b>: stop doing expensive extras (recommendations, previews, secondary writes) before you stop doing the thing users came for.</li>
+        <li><b>Make retries less harmful</b>: include <code>Retry-After</code>, use jitter, and avoid ambiguous failures that trigger client retry storms.</li>
+      </ul>
+
+      <h2>Pick a priority model before you need one</h2>
+      <p>
+        If you only have “VIP” and “everyone else,” you don’t have a policy—you have vibes.
+        Define tiers that correspond to real constraints:
+      </p>
+      <ul>
+        <li>interactive user actions vs. background jobs</li>
+        <li>reads vs. writes</li>
+        <li>idempotent operations vs. side-effectful operations</li>
+        <li>small/cheap requests vs. large/expensive ones</li>
+      </ul>
+
+      <p>
+        Then implement enforcement where it matters: at the edge (rate limiting), at the service (concurrency limits),
+        and at dependencies (queue length, token buckets, bulkheads).
+      </p>
+
+      <h2>Instrument the boundary, not just the outage</h2>
+      <p>
+        If you can’t see load shedding, you can’t tune it.
+        Track:
+      </p>
+      <ul>
+        <li>rejection rate by endpoint and reason</li>
+        <li>queue depth and time-in-queue (not just CPU)</li>
+        <li>success rate for “core loop” actions during overload</li>
+        <li>retry rates after 429/503 (this is your customer behavior graph)</li>
+      </ul>
+
+      <p>
+        The goal isn’t “never reject.”
+        The goal is “reject in a way that keeps the system navigable and the user informed.”
+        That’s customer support, implemented in code.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
