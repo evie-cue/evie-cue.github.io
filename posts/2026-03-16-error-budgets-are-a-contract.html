@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Error budgets are a contract — Evie Cue</title>
+  <meta name="description" content="An error budget is an agreement about risk, not a reward for outages. Spend it intentionally, or it will be spent on you." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-16</div>
+    </div>
+
+    <h1>Error budgets are a contract</h1>
+
+    <article>
+      <p>
+        An error budget is not a trophy.
+        It’s not permission to be sloppy.
+        It’s a contract: “Here is how much unreliability the business is willing to tolerate in exchange for speed.”
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          If you don’t spend the budget intentionally, it will be spent on you—during incidents, launches, and weekends.
+        </p>
+      </div>
+
+      <h2>What the contract is trying to prevent</h2>
+      <p>
+        Without a budget, reliability work becomes moral philosophy.
+        Every team meeting turns into “should we ship?” debates where the loudest person wins.
+      </p>
+      <p>
+        The budget turns that into a measurable constraint.
+        You can disagree on priorities, but you can’t argue with the burn rate.
+      </p>
+
+      <h2>Three failure modes that make budgets useless</h2>
+      <ul>
+        <li><b>Budget as punishment</b>: teams hide incidents because “reliability will block releases.” You get fewer alerts and more surprises.</li>
+        <li><b>Budget as vibes</b>: no clear SLO, no window, no agreed measurement. The “budget” is just a slide that gets ignored.</li>
+        <li><b>Budget as theater</b>: SLOs exist, but nothing changes when you burn them. The contract has no enforcement.</li>
+      </ul>
+
+      <h2>Make the spend visible (and boring)</h2>
+      <p>
+        Treat error budget like money: you want an account statement.
+        You want to know what transactions happened, and why.
+      </p>
+      <ul>
+        <li><b>Define the window</b>: 28 days is common. Pick something that matches your release cadence and incident half-life.</li>
+        <li><b>Track burn rate</b>: “How fast are we consuming availability?” is more actionable than “what’s the uptime?”</li>
+        <li><b>Tag major consumers</b>: deploy regression, dependency outage, bad query, thundering herd. This is how you find the real work.</li>
+      </ul>
+
+      <h2>Budget policy: what happens when you’re out</h2>
+      <p>
+        When the budget is gone, you need a default behavior.
+        Not a panic meeting.
+      </p>
+      <ul>
+        <li><b>Release gates</b>: only ship changes that reduce risk (fixes, rollbacks, guardrails).</li>
+        <li><b>Operational focus</b>: pay down the top contributors to burn (timeouts, saturation, retry storms, noisy neighbors).</li>
+        <li><b>Product honesty</b>: if the system can’t meet the SLO at current demand, admit it and re-scope the experience (load shed, simplify, degrade).</li>
+      </ul>
+
+      <h2>Budgets are for alignment, not blame</h2>
+      <p>
+        The point is to align engineering reality with business appetite for risk.
+        If leadership wants faster shipping, that’s fine.
+        But the contract means you also pick your failure shape: more incidents, more guardrails, or more time.
+      </p>
+      <p>
+        SRE is mostly negotiation.
+        Error budgets are the part where you write it down.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
