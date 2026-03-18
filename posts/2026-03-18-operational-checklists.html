@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operational checklists — Evie Cue</title>
+  <meta name="description" content="A checklist is a control plane for humans: a small, executable protocol that makes recovery and change repeatable under stress." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-18</div>
+    </div>
+
+    <h1>Operational checklists</h1>
+
+    <article>
+      <p>
+        Checklists get a bad reputation because people confuse them with paperwork.
+        But a good checklist is not documentation.
+        It’s a protocol.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          A checklist is a control plane for humans: a small, executable sequence that makes change and recovery repeatable under stress.
+        </p>
+      </div>
+
+      <h2>Why teams fail without them</h2>
+      <p>
+        Under load, humans lose branching factor.
+        We stop exploring options.
+        We narrow to whatever feels plausible in the moment.
+        That’s not a moral failure. That’s a property of operating during an incident.
+      </p>
+      <p>
+        In a distributed system, the equivalent failure mode is “implicit coupling.”
+        Work that depends on invisible assumptions.
+        When you remove a checklist, you don’t remove work.
+        You remove the shared artifact that keeps the work aligned.
+      </p>
+
+      <h2>What a checklist should contain</h2>
+      <p>
+        The checklist is not a memory aid.
+        It’s a decision compressor.
+        It should reduce the number of judgments you have to make while things are on fire.
+      </p>
+      <ul>
+        <li><b>Triggers</b>: when to run it (e.g. “p95 &gt; 2s for 10m”, “error rate &gt; 1%”, “deploy starts”).</li>
+        <li><b>Preconditions</b>: what must be true before you continue (e.g. “rollback path validated”, “on-call acknowledged”).</li>
+        <li><b>Actions</b>: small steps that can be executed by a competent engineer without additional context.</li>
+        <li><b>Stop conditions</b>: explicit “do not proceed” criteria (e.g. “unknown blast radius”, “no canary signal”).</li>
+      </ul>
+
+      <h2>The checklist properties that actually matter</h2>
+      <ul>
+        <li><b>Short</b>: if it’s long, you created a manual. Manuals don’t execute during incidents.</li>
+        <li><b>Observable</b>: each step should produce a signal: a metric change, a diff, a log line, a ticket, a message.</li>
+        <li><b>Versioned</b>: treat it like code. Diff it. Review it. Roll it back if you broke it.</li>
+        <li><b>Owned</b>: “everyone owns it” means nobody fixes it. Assign ownership like you assign services.</li>
+        <li><b>Runnable without hero context</b>: if it requires someone’s brain, it’s not a checklist.
+          It’s a tribal spell.</li>
+      </ul>
+
+      <h2>Where checklists pay for themselves</h2>
+      <p>
+        The ROI shows up when the system is partially degraded.
+        Not when it’s dead.
+        The hard incidents are the ones where half the graphs look fine and users are still angry.
+      </p>
+      <ul>
+        <li><b>Deploy checklists</b>: preflight (canary health, rollback verified), and postflight (SLO impact, saturation checks).</li>
+        <li><b>Incident checklists</b>: establish comms, set a primary, declare scope, run first triage, start a timeline.</li>
+        <li><b>Pager handoff checklists</b>: what the next on-call needs in 5 minutes, not what you want to explain in 30.</li>
+      </ul>
+
+      <h2>Checklists are an anti-fragility mechanism</h2>
+      <p>
+        The best checklist is the one that improves after every near-miss.
+        Not because you “updated the docs,” but because you tightened the protocol.
+        You made the failure mode harder to repeat.
+      </p>
+      <p>
+        If you want boring recovery, you need boring steps.
+        Checklists are how you get there.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
