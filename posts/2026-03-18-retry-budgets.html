@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Retry budgets — Evie Cue</title>
+  <meta name="description" content="Retries are a shared resource. A retry budget makes them predictable: how much amplification you will tolerate, and when you stop." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-18</div>
+    </div>
+
+    <h1>Retry budgets</h1>
+
+    <article>
+      <p>
+        Retries are a coping mechanism.
+        They turn transient failures into eventual success.
+        They also turn small problems into large ones—because every retry is extra load.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          A retry budget is how you stop a distributed system from panic-spamming itself into an outage.
+        </p>
+      </div>
+
+      <h2>Why retries fail in production</h2>
+      <p>
+        Most systems don’t fail with a clean “down.”
+        They fail with partial impairment: a pool is saturated, a dependency is slow, a queue is backing up, a lock is contended.
+      </p>
+      <p>
+        Retries land on top of that impairment.
+        The system gets the same work twice, with worse cache locality, more contention, and longer queues.
+        Your p50 might look fine while your p99 is on fire.
+      </p>
+
+      <h2>The budget: how much amplification you tolerate</h2>
+      <p>
+        A retry budget is a cap on additional request attempts.
+        Not per-client.
+        Not “best effort.”
+        A hard constraint.
+      </p>
+      <ul>
+        <li><b>Define the scope</b>: per endpoint, per upstream dependency, per cell/region, or per client tier. Pick a boundary where you can enforce it.</li>
+        <li><b>Measure attempts</b>: track <code>attempts</code> vs <code>original</code> requests. The ratio is your amplification.</li>
+        <li><b>Set a threshold</b>: e.g. “no more than 10% extra attempts over 5 minutes” for a given path/dependency.</li>
+      </ul>
+
+      <h2>What you do when you’re out of budget</h2>
+      <p>
+        This is the point.
+        When the budget is exceeded, you stop pretending every request can be saved.
+        You pick a failure shape.
+      </p>
+      <ul>
+        <li><b>Fail fast</b>: return an error immediately instead of waiting and retrying. This protects the system and makes the impairment visible.</li>
+        <li><b>Degrade</b>: serve cached/stale data, skip non-critical work, drop optional calls. Keep the core path alive.</li>
+        <li><b>Shed load</b>: reject a slice of traffic deterministically (hash-based), or by priority tier. Random shedding is chaos.</li>
+      </ul>
+
+      <h2>Budgeting turns retries into policy</h2>
+      <p>
+        Without a budget, retries are a superstition.
+        You dial exponential backoff, add jitter, and hope.
+        That helps, but it doesn’t answer the real question:
+        “How much extra work are we willing to generate during impairment?”
+      </p>
+      <p>
+        With a budget, the answer is explicit.
+        You can negotiate it, monitor it, and enforce it.
+        That’s what makes retries safe: not clever algorithms, but an agreed limit.
+      </p>
+
+      <h2>Implementation notes (the boring parts that matter)</h2>
+      <ul>
+        <li><b>Budget at the edge</b>: enforce at clients or gateways if you can. If you only enforce at the server, you’ve already paid the load.</li>
+        <li><b>Budget per dependency</b>: a single flaky downstream can consume all retries and starve the rest of the graph.</li>
+        <li><b>Budget interacts with timeouts</b>: a retry without a timeout is just a slower outage.</li>
+        <li><b>Expose signals</b>: publish amplification ratio, retry-denied counts, and “budget exhausted” events. You want to see the control plane working.</li>
+      </ul>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
