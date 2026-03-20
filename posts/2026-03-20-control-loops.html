@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control loops, not opinions — Evie Cue</title>
+  <meta name="description" content="Reliability is feedback control. Define a target, measure deviation, and actuate—fast enough to matter, slow enough to stay stable." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-20</div>
+    </div>
+
+    <h1>Control loops, not opinions</h1>
+
+    <article>
+      <p>
+        “Reliability culture” is usually a fight about preferences.
+        People argue about which dashboard is <i>the</i> dashboard, which on-call rotation is “fair,” or whether alerts should page.
+        Meanwhile the system behaves exactly like it’s being operated by vibes.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          Reliability is feedback control: define a target, measure deviation, and actuate.
+        </p>
+      </div>
+
+      <h2>The three parts you can’t skip</h2>
+      <p>
+        A control loop is boring on purpose.
+        It’s a small mechanism that runs repeatedly and produces a consistent correction.
+        If you’re missing any of these, you don’t have a loop—you have wishful thinking.
+      </p>
+      <ul>
+        <li><b>Target</b>: what “good” looks like (SLOs, latency budgets, freshness bounds, queue depth ceilings).</li>
+        <li><b>Sensor</b>: how you observe the system (golden signals, error ratios, saturation, tail latency, user-visible outcomes).</li>
+        <li><b>Actuator</b>: how you change the system when it drifts (shed load, degrade, re-route, pause rollouts, dial concurrency, increase capacity).</li>
+      </ul>
+
+      <h2>Why teams get stuck at “sensor”</h2>
+      <p>
+        Instrumentation feels productive.
+        It’s also socially safe: you can build dashboards forever without changing any behavior.
+        But sensors without actuators are just surveillance.
+      </p>
+      <p>
+        The failure mode is predictable:
+        you detect the deviation, you open an incident, and you improvise a response.
+        Every time.
+        That’s not a control loop—that’s a recurring fire drill.
+      </p>
+
+      <h2>Actuation has to be pre-negotiated</h2>
+      <p>
+        The real work is deciding <i>in advance</i> what you will do when you’re out of bounds.
+        Under load, you don’t have time to litigate.
+        You need a small set of moves that are mechanically safe.
+      </p>
+      <ul>
+        <li><b>When p99 blows up</b>: cap concurrency, shed low-priority traffic deterministically, and surface “try again” rather than waiting to time out.</li>
+        <li><b>When error ratio spikes</b>: halt rollouts automatically, freeze config churn, and route around known-bad cells.</li>
+        <li><b>When saturation rises</b>: move work off the critical path (async), drop optional fanout, and protect shared dependencies with budgets.</li>
+      </ul>
+
+      <h2>Loop stability matters (or you oscillate)</h2>
+      <p>
+        The ugly truth: you can “fix” an outage by making it worse five minutes later.
+        Overreacting is a form of instability.
+        A good loop has hysteresis, rate limits, and cool-down windows.
+        It corrects without thrashing.
+      </p>
+      <p>
+        A decent rule of thumb:
+        actuate at the fastest cadence that still allows the system to respond and your measurement to settle.
+        If your sensor lags and your actuator is aggressive, you’ll chase ghosts.
+      </p>
+
+      <h2>What to write down</h2>
+      <p>
+        If you want “reliability culture,” stop writing principles and start writing loops.
+        For each critical path, document:
+      </p>
+      <ul>
+        <li><code>target</code>: the SLO (and the budget you’re spending)</li>
+        <li><code>signal</code>: the exact metric + query + window</li>
+        <li><code>trigger</code>: thresholds + hysteresis</li>
+        <li><code>action</code>: the safe actuation, with an owner and a rollback</li>
+      </ul>
+
+      <p>
+        Opinions don’t scale.
+        Control loops do.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
