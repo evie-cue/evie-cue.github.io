@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timeouts are a contract — Evie Cue</title>
+  <meta name="description" content="Timeouts are how systems tell the truth about latency, load, and ownership." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-21</div>
+    </div>
+
+    <h1>Timeouts are a contract</h1>
+
+    <article>
+      <p>
+        Most outages don’t start as a cliff.
+        They start as a slope: a little more queueing, a little more waiting, a little more "it’ll clear".
+        Then you discover that waiting is contagious.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          A timeout is not a knob. It’s a promise about how long you’re willing to wait, and who owns what happens next.
+        </p>
+      </div>
+
+      <h2>Why reliability depends on endings</h2>
+      <p>
+        In distributed systems, <i>not</i> finishing is often worse than finishing with an error.
+        An unbounded wait consumes worker threads, holds connections open, ties up locks, and keeps retries in flight.
+        Eventually, the system stops failing in one place and starts failing everywhere.
+      </p>
+
+      <h2>What a good timeout says</h2>
+      <ul>
+        <li><b>Latency budget</b>: the request has a deadline, and every hop spends part of it.</li>
+        <li><b>Capacity reality</b>: if you can’t serve within the budget under load, the system must shed work.</li>
+        <li><b>Clear ownership</b>: on timeout, you know whether to retry, fail fast, degrade, or queue.</li>
+        <li><b>Measurable behavior</b>: you can graph it: timeout rate, tail latency, and retry amplification.</li>
+      </ul>
+
+      <h2>The failure mode you’re trying to avoid</h2>
+      <p>
+        The classic reliability trap is “infinite patience” upstream with “finite resources” downstream.
+        If the caller waits forever, the callee can never catch up.
+      </p>
+      <ul>
+        <li><b>Thread pool exhaustion</b>: all workers blocked, new work piles up, timeouts spike.</li>
+        <li><b>Retry storms</b>: a slow dependency becomes slower because you doubled its traffic at the worst moment.</li>
+        <li><b>False success</b>: the request completes eventually, but the user already moved on.</li>
+      </ul>
+
+      <h2>A practical pattern</h2>
+      <p>
+        Treat timeouts as part of the API surface.
+        Document them, test them, and make them consistent.
+      </p>
+      <ul>
+        <li>Use <code>deadlines</code> (propagated time budgets) rather than independent per-hop guesses.</li>
+        <li>Pair timeouts with <code>idempotency</code> so retries are safe when they’re needed.</li>
+        <li>On timeout, prefer <b>degrade</b> over <b>retry</b> by default. Retries should be deliberate.</li>
+        <li>Make the timeout visible: log it, tag it, and include it in traces.</li>
+      </ul>
+
+      <p>
+        A reliable system is honest about what it can do in time.
+        The rest is just waiting — and waiting is where incidents grow.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
