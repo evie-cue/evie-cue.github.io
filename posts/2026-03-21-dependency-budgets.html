@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dependency budgets — Evie Cue</title>
+  <meta name="description" content="A reliable system has budgets for its dependencies: time, retries, and blast radius. If you don’t allocate them explicitly, you’ll spend them accidentally." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    code{font-family:var(--mono);font-size:12px;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-21</div>
+    </div>
+
+    <h1>Dependency budgets</h1>
+
+    <article>
+      <p>
+        “It’s slow because the database is slow” is not a diagnosis.
+        It’s a confession that nobody decided how much of your request you’re willing to donate to someone else’s latency.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          A reliable system has budgets for its dependencies: time, retries, and blast radius.
+        </p>
+      </div>
+
+      <h2>Most systems fail by overdrafting</h2>
+      <p>
+        Dependencies aren’t just “other services.” They’re anything you wait on:
+        databases, caches, queues, third-party APIs, feature flag backends, identity providers, even your own downstream batch jobs.
+      </p>
+      <p>
+        If you don’t allocate a budget, you’ll spend one accidentally.
+        You’ll stack timeouts, multiply retries, and propagate failure.
+        The system doesn’t break because one dependency is slow; it breaks because everything is allowed to wait.
+      </p>
+
+      <h2>Three budgets to set (explicitly)</h2>
+      <ul>
+        <li><b>Time budget</b>: how many milliseconds this dependency is allowed to consume <i>within</i> your request SLA.</li>
+        <li><b>Retry budget</b>: how many extra attempts you can afford without becoming your own load test.</li>
+        <li><b>Blast-radius budget</b>: which calls are allowed to fail open, degrade, or be dropped entirely.</li>
+      </ul>
+
+      <h2>Time budget: stop letting timeouts compose</h2>
+      <p>
+        The classic distributed-systems mistake is a timeout pyramid:
+        the caller waits 2s, the downstream waits 2s, the database waits 2s, and now you’ve created a 6s surprise.
+        Multiply by fanout and you get a tail-latency bonfire.
+      </p>
+      <p>
+        A sane time budget is top-down:
+        start from the user-facing SLA, subtract your own work, and allocate what’s left.
+        If a dependency can’t fit, it doesn’t belong on the critical path.
+      </p>
+      <ul>
+        <li><code>request_SLO</code> = 800ms p99</li>
+        <li><code>service_compute</code> = 120ms</li>
+        <li><code>dependency_budget_total</code> = 680ms (shared across all downstream calls)</li>
+      </ul>
+
+      <h2>Retry budget: retries are a privilege</h2>
+      <p>
+        Retries are not “reliability.” They’re load.
+        If you retry without a budget, you’re borrowing capacity from the worst possible moment.
+      </p>
+      <p>
+        Good retry policy is conditional and bounded:
+        retry only on errors that are likely transient, with jittered backoff, and with a hard ceiling.
+        Better: route around the failing cell, or degrade the feature.
+      </p>
+      <ul>
+        <li>Prefer <b>one</b> retry with a short backoff over three retries that extend the tail.</li>
+        <li>Use <b>hedged requests</b> only when you can afford the duplication and you’ve measured the win.</li>
+        <li>Gate retries on <b>budget remaining</b> and <b>system health</b> (error ratio, saturation).</li>
+      </ul>
+
+      <h2>Blast radius: decide what you can drop</h2>
+      <p>
+        “Everything must succeed” is how you turn partial failure into total failure.
+        The right question is: what must succeed for the user to get value right now?
+      </p>
+      <p>
+        Put non-critical dependencies behind degradations that are mechanically safe:
+      </p>
+      <ul>
+        <li>Serve cached data with a freshness bound.</li>
+        <li>Disable optional fanout (recommendations, enrichment, analytics beacons).</li>
+        <li>Return a smaller response instead of timing out.</li>
+        <li>Fail open when the alternative is failing closed for everyone.</li>
+      </ul>
+
+      <h2>What to write down</h2>
+      <p>
+        This is not a philosophy exercise.
+        Make a one-page contract per critical endpoint:
+      </p>
+      <ul>
+        <li><code>sla</code>: user-visible target (p50/p95/p99)</li>
+        <li><code>deps</code>: list of downstream calls + allocated time budgets</li>
+        <li><code>timeouts</code>: where they live (client vs server) and why</li>
+        <li><code>retries</code>: max attempts, conditions, and the budget guardrail</li>
+        <li><code>degrade</code>: what you drop first, and what you <i>never</i> drop</li>
+      </ul>
+
+      <p>
+        Reliability isn’t “dependency health.”
+        It’s whether you can keep your promises when dependencies aren’t healthy.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <!-- Utterances comments -->
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
