@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Circuit breakers are interface design — Evie Cue</title>
+  <meta name="description" content="A circuit breaker is an API decision: what you do when the dependency is not healthy enough to trust." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-21</div>
+    </div>
+
+    <h1>Circuit breakers are interface design</h1>
+
+    <article>
+      <p>
+        Most teams talk about circuit breakers like they’re a library feature.
+        Add a dependency wrapper, set a threshold, ship it.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          A circuit breaker is an API decision: what response you return when you no longer trust the dependency.
+        </p>
+      </div>
+
+      <p>
+        The breaker is the <i>mechanism</i>. The hard part is the <i>contract</i>.
+        When the breaker opens, the system has to pick a behavior that is safe, understandable, and cheap.
+        If you don’t choose deliberately, you’ll get whatever your defaults produce under panic.
+      </p>
+
+      <h2>What you’re actually designing</h2>
+      <ul>
+        <li><b>Failure semantics</b>: do callers see <code>503</code>, stale data, partial results, or a cached value?</li>
+        <li><b>Blast radius</b>: does one noisy tenant trip the breaker for everyone, or is it scoped?</li>
+        <li><b>Load shape</b>: does the fallback create more load (rendering, fanout, retries), or less?</li>
+        <li><b>Operator posture</b>: can on-call predict what the product does while the graph is on fire?</li>
+      </ul>
+
+      <h2>The common mistake: “open” is not a plan</h2>
+      <p>
+        Teams often implement “open means fail fast”, and call it done.
+        That’s sometimes correct.
+        It’s also sometimes a product outage with nicer latency.
+      </p>
+      <p>
+        A breaker without a fallback is still valuable (it prevents resource exhaustion),
+        but it’s not <i>resilience</i> unless the system has a degraded mode that users can live with.
+      </p>
+
+      <h2>Good fallbacks are boring and explicit</h2>
+      <ul>
+        <li><b>Stale-with-bounds</b>: serve cached data with an age limit; expose <code>Age</code> or “last updated”.</li>
+        <li><b>Partial answers</b>: omit the risky component; don’t block the whole page on a badge.</li>
+        <li><b>Static defaults</b>: return a safe baseline (e.g., “no recommendations”) that doesn’t trigger more calls.</li>
+        <li><b>Queue for later</b>: accept the request but complete asynchronously (only when users expect it).</li>
+      </ul>
+
+      <h2>Scope the breaker like you scope risk</h2>
+      <p>
+        Global breakers are easy to build and easy to regret.
+        If one tenant or one keyspace is pathological, you want to trip locally.
+        The right scope depends on the dependency and the threat model:
+      </p>
+      <ul>
+        <li><b>Per-host</b> when failures correlate with instances.</li>
+        <li><b>Per-route / per-method</b> when different calls have different error modes.</li>
+        <li><b>Per-tenant</b> when fairness matters.</li>
+        <li><b>Per-region</b> when you’d rather degrade than fail over into a bigger problem.</li>
+      </ul>
+
+      <h2>Make it observable (or it’s just a rumor)</h2>
+      <p>
+        If a breaker trips and you can’t tell <i>why</i>, you’ll either flap it manually or disable it in frustration.
+        A usable breaker needs:
+      </p>
+      <ul>
+        <li><b>State</b>: closed / open / half-open, exported as a metric.</li>
+        <li><b>Reason</b>: which signals caused the trip (timeouts, 5xx, saturation, queue depth).</li>
+        <li><b>Impact</b>: how many requests hit fallback, and what users saw.</li>
+        <li><b>Hysteresis</b>: slow recovery, not instant optimism.</li>
+      </ul>
+
+      <p>
+        Reliability isn’t “never failing”.
+        It’s failing in a way you can predict, explain, and operate.
+        Circuit breakers are how you teach an interface to tell the truth under load.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
