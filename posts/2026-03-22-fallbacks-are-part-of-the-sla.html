@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fallbacks are part of the SLA — Evie Cue</title>
+  <meta name="description" content="If the degraded path isn’t designed, tested, and observable, it’s not a fallback. It’s a second outage." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-22</div>
+    </div>
+
+    <h1>Fallbacks are part of the SLA</h1>
+
+    <article>
+      <p>
+        A fallback is supposed to be the calm, boring path.
+        The one you take when the world is on fire.
+      </p>
+      <p>
+        But in practice, most “fallbacks” are just alternate ways to fail.
+        They’re under-specified, untested, and invisible in dashboards.
+        Then you hit a dependency incident and discover your backup plan is also down.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          If the degraded path isn’t designed, tested, and observable, it’s not a fallback.
+          It’s a second outage waiting for a slightly different trigger.
+        </p>
+      </div>
+
+      <h2>What a real fallback actually is</h2>
+      <p>
+        A fallback is a <i>contracted behavior under partial failure</i>.
+        It changes the shape of the product so the system can keep its promises.
+      </p>
+      <ul>
+        <li><b>Different output</b>: fewer features, less freshness, lower precision.</li>
+        <li><b>Different cost</b>: cheaper compute, fewer dependencies, less fanout.</li>
+        <li><b>Different truth</b>: explicit “this may be stale” is better than silent corruption.</li>
+      </ul>
+
+      <h2>The common lie: “we’ll just show cached”</h2>
+      <p>
+        “Serve from cache” is not a strategy unless you’ve answered the questions you’ll get asked during the incident:
+      </p>
+      <ul>
+        <li>How stale is allowed? What’s the TTL <i>under load</i>?</li>
+        <li>What do you do on cache miss when the origin is unhealthy?</li>
+        <li>What’s the blast radius if cached data is wrong?</li>
+        <li>How do you prevent a thundering herd when the dependency recovers?</li>
+      </ul>
+
+      <h2>Design rules that keep you honest</h2>
+      <ul>
+        <li><b>Make the fallback path cheaper</b>. If it’s just as expensive, it won’t save you.</li>
+        <li><b>Fail closed on correctness</b>. If incorrect output is worse than empty output, return empty.</li>
+        <li><b>Prefer precomputation</b>. Compute the hard thing when you’re healthy, not while you’re dying.</li>
+        <li><b>Keep it dependency-light</b>. The whole point is to reduce coupling during incidents.</li>
+        <li><b>Make it explicit in the UI/API</b>. “Degraded mode” should be visible, not implied.</li>
+      </ul>
+
+      <h2>Test it like you’ll need it</h2>
+      <p>
+        Fallbacks fail for the same reason backups fail: nobody exercises them.
+      </p>
+      <ul>
+        <li>Run a weekly synthetic that forces the fallback and asserts expected output.</li>
+        <li>Alert on <code>fallback_rate</code> and <code>fallback_latency</code> — treat spikes as signals, not noise.</li>
+        <li>Write a runbook section: “What should I see when the fallback is working?”</li>
+      </ul>
+
+      <p>
+        Reliability isn’t “never break”.
+        It’s “when something breaks, we still know what we’re doing”.
+        The fallback path is where that claim is either true or marketing.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
