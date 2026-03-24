@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Make the safe action easy — Evie Cue</title>
+  <meta name="description" content="Reliability isn’t just redundancy. It’s giving on-call a fast, reversible move that reduces blast radius." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-24</div>
+    </div>
+
+    <h1>Make the safe action easy</h1>
+
+    <article>
+      <p>
+        During an incident, “what should we do?” is usually not the hard part.
+        The hard part is that the <i>safe</i> action is slow, undocumented, permission-gated,
+        or requires a bespoke SQL query written with shaking hands.
+      </p>
+      <p>
+        So people do the thing that is fast.
+        The thing that works <i>once</i>.
+        The thing that quietly increases blast radius.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          Reliability is giving on-call a fast, reversible move that reduces blast radius.
+          If the safest action is the hardest action, you’ve designed for heroics.
+        </p>
+      </div>
+
+      <h2>What “easy” means in production</h2>
+      <p>
+        Easy isn’t “simple in principle.”
+        Easy is: you can do it at 03:00, from a laptop on hotel Wi‑Fi, while Slack is on fire.
+      </p>
+      <ul>
+        <li><b>Low cognitive load</b>: one command, one UI control, one runbook section.</li>
+        <li><b>Reversible</b>: you can undo it without a second deployment.</li>
+        <li><b>Scoped</b>: affects one tenant, one cell, one cohort—before it affects everyone.</li>
+        <li><b>Auditable</b>: every activation is logged with who/when/why.</li>
+        <li><b>Observable</b>: you can see it working in metrics within minutes.</li>
+      </ul>
+
+      <h2>The unsafe trap: “just restart it”</h2>
+      <p>
+        Restarts are popular because they’re easy.
+        But “restart it” is often a blind bet that the system will come back in a healthier shape.
+      </p>
+      <p>
+        If a restart is your primary safety valve, you have a control-plane gap.
+        You’re using process lifecycle as an operational interface.
+        That’s not a strategy; it’s a coping mechanism.
+      </p>
+
+      <h2>Safety valves you can actually use</h2>
+      <p>
+        The pattern is boring: provide a few levers that trade features for survival.
+        The key is to design them like product surface area, not internal hacks.
+      </p>
+      <ul>
+        <li><b>Degrade reads</b>: serve cached/stale with an explicit freshness signal.</li>
+        <li><b>Degrade writes</b>: queue, reject, or shed non-critical write paths.</li>
+        <li><b>Reduce fanout</b>: cap parallelism; stop doing “nice-to-have” secondary calls.</li>
+        <li><b>Gate expensive work</b>: dynamic sampling, rate limits, per-tenant circuit breakers.</li>
+        <li><b>Freeze the blast radius</b>: cell isolation; one bad shard shouldn’t become global.</li>
+      </ul>
+
+      <h2>Make it safer than doing nothing</h2>
+      <p>
+        The highest bar is not “works in staging.”
+        The bar is: the lever is so well-integrated that doing the safe thing is faster than debating it.
+      </p>
+      <ul>
+        <li>Run a weekly drill that forces one safe action (e.g., turn on read-degrade for a canary cohort).</li>
+        <li>Expose a single dashboard panel that answers: <code>is_degraded</code>, <code>who_is_affected</code>, and <code>what_improved</code>.</li>
+        <li>Write the runbook around <i>decisions</i>, not commands: “If p99 &gt; X and error rate &gt; Y, do Z.”</li>
+      </ul>
+
+      <p>
+        Your systems will fail.
+        Your job is to make sure the first instinct reduces harm.
+        That’s what it means to “design for operations.”
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
