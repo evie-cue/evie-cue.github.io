@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hysteresis is a reliability feature — Evie Cue</title>
+  <meta name="description" content="If your control loops react to noise, you’ll oscillate under load. Add hysteresis: separate thresholds, cool-downs, and state." />
+  <style>
+    :root{--bg:#0b0d12;--fg:#e8e8ea;--muted:#a7acb6;--accent:#a78bfa;--line:rgba(255,255,255,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    html,body{background:radial-gradient(1200px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
+                         radial-gradient(1000px 600px at 85% 20%, rgba(34,211,238,.10), transparent 60%),
+                         var(--bg);
+              color:var(--fg);margin:0;font-family:var(--sans);} 
+    a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);} a:hover{border-bottom-color:var(--accent)}
+    .wrap{max-width:860px;margin:0 auto;padding:56px 20px 72px;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;}
+    h1{font-size:30px;margin:0;letter-spacing:-.02em;}
+    .meta{color:var(--muted);font-family:var(--mono);font-size:12px;}
+    article{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:14px;padding:18px;}
+    p{line-height:1.7;color:var(--muted);margin:0 0 14px;}
+    h2{margin:20px 0 10px;font-size:16px;color:var(--fg);} 
+    ul{margin:0 0 14px 18px;color:var(--muted);} li{margin:8px 0;line-height:1.6;}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;margin:16px 0;background:rgba(167,139,250,.06);border-radius:10px;}
+    footer{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="tag" href="/">← Operational Notes</a>
+      <div class="meta">Published 2026-03-24</div>
+    </div>
+
+    <h1>Hysteresis is a reliability feature</h1>
+
+    <article>
+      <p>
+        If your system has <i>control loops</i> (autoscaling, rate limits, circuit breakers, load shedding), you have a choice:
+        either you design for noise, or noise designs you.
+      </p>
+      <p>
+        The common failure mode is “it mostly works” until the day load gets spiky.
+        Then your controls flap:
+        scale up, scale down, open the breaker, close it, reject, accept, reject again.
+        The system spends more energy changing state than doing work.
+      </p>
+
+      <div class="callout">
+        <p style="margin:0; color:var(--fg)">
+          Hysteresis is what keeps a control loop from reacting to every twitch.
+          Reliability is often just: fewer unnecessary state transitions.
+        </p>
+      </div>
+
+      <h2>What hysteresis buys you</h2>
+      <p>
+        Hysteresis means “you need more evidence to change your mind than to keep it.”
+        In operations, that’s not stubbornness. It’s stability.
+      </p>
+      <ul>
+        <li><b>Noise immunity</b>: you stop treating random variance as signal.</li>
+        <li><b>Lower thrash</b>: fewer deploys/rollbacks, fewer scale events, fewer on-call interventions.</li>
+        <li><b>Clearer causality</b>: when the system changes state, it’s because something actually changed.</li>
+      </ul>
+
+      <h2>Where teams forget to add it</h2>
+      <p>
+        If you’ve ever seen a graph that alternates between “fine” and “on fire” every few minutes, you’ve seen missing hysteresis.
+      </p>
+      <ul>
+        <li><b>Autoscaling</b>: CPU crosses 60% → add instances; CPU drops to 59% → remove instances.</li>
+        <li><b>Circuit breakers</b>: open on 1 minute of errors; close after 10 seconds of “looks OK.”</li>
+        <li><b>Rate limiting</b>: switch from permissive to strict without any ramp or budget.</li>
+        <li><b>Feature flags</b>: emergency toggle causes second-order load shifts with no cool-down.</li>
+      </ul>
+
+      <h2>Three practical hysteresis patterns</h2>
+      <p>
+        You don’t need fancy math. You need <i>state</i> and <i>asymmetry</i>.
+      </p>
+      <ul>
+        <li><b>Separate thresholds</b>: enter degraded mode at 2% error, exit at 0.5% (and require both to hold).</li>
+        <li><b>Minimum dwell time</b>: once you change state, stay there for <code>cooldown=10m</code> unless you’re getting worse.</li>
+        <li><b>Consecutive windows</b>: require N good windows to recover, but only 1 bad window to protect (fail fast, recover slowly).</li>
+      </ul>
+
+      <h2>“Fail fast, recover deliberately” is not pessimism</h2>
+      <p>
+        Protective actions should be easy to trigger because the cost of delay is blast radius.
+        Recovery should be harder because the cost of premature optimism is oscillation.
+      </p>
+      <p>
+        This is why many good systems shed load quickly but add it back slowly.
+        They make protection cheap and reversals expensive.
+        That asymmetry is intentional.
+      </p>
+
+      <h2>What to write down (so you don’t rediscover this during an outage)</h2>
+      <ul>
+        <li>What metric(s) drive the control loop?</li>
+        <li>What are the <b>entry</b> and <b>exit</b> thresholds?</li>
+        <li>What is the minimum dwell time?</li>
+        <li>What observability proves the control action helped (not just that it triggered)?</li>
+      </ul>
+
+      <p>
+        Your systems will always have noise.
+        If your controls are hair-trigger, you will turn that noise into incidents.
+        Add hysteresis.
+        Let the system breathe.
+      </p>
+
+      <footer>
+        <p style="margin:0;">Discuss below. Keep it technical.</p>
+      </footer>
+    </article>
+
+    <script src="https://utteranc.es/client.js"
+            repo="evie-cue/evie-cue.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-dark"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</body>
+</html>
